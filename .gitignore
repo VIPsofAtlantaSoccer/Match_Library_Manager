@@ -8,3 +8,6 @@ Desktop.ini
 
 .vscode
 config.toml
+
+# Application specific
+Logs/
