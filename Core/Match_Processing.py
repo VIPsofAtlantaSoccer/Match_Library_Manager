@@ -45,6 +45,8 @@ class Match_Processing:
                 raise ValueError( f"{self.Team_ID}: CSV is missing the Date column" )
 
             for Line_Number, Row in enumerate( Reader, start = 2 ):
+                if ( ( Row.get( "Date" ) or "" ).strip().startswith( "#" ) ):
+                    continue
                 if ( None in Row ):
                     self.Warnings.append( f"Line {Line_Number}: Too many CSV values" )
                     continue

@@ -3,5 +3,9 @@ Date,Time,Comp,Round,Day,Venue,Result,Goals For,Goals Against,Shootout Result,Sh
 2017-03-12,16:00,MLS,Regular Season,Sun,Away,W,6,1,,,,Minnesota United,,,Michael Parkhurst,4-2-3-1,4-2-3-1,4-1-4-1,4-1-4-1,Ismail Elfath,,,
 2017-03-18,16:00,MLS,Regular Season,Sat,Home,W,4,0,,,,Chicago Fire,,,Michael Parkhurst,4-2-3-1,4-2-3-1,4-4-1-1,4-4-1-1,José Carlos Rivero,,,
 2017-03-31,19:00,MLS,Regular Season,Fri,Away,D,0,0,,,,Seattle Sounders,,,Michael Parkhurst,4-3-3,4-3-3,4-2-3-1,4-2-3-1,Robert Sibiga,,,
+# Partial info
 2027-03-06
+# Invalid
 INVALID-DATE
+# Renaming previous directory 
+2027-03-06,19:30,MLS,Regular Season,Sat,Home,W,2,1,,,,Orlando City
