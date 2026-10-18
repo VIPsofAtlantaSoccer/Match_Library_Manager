@@ -24,6 +24,7 @@ Match Library Manager reads match data from CSV files and creates or updates dir
 
 - Python 3.11 or newer
 - Dependencies listed in `requirements.txt`
+A sample CSV file is provided at [`Tests/Tests_Matchlogs.csv`](Tests/Tests_Matchlogs.csv) to demonstrate the expected format and provide example match data for testing.
 
 Install dependencies:
 
