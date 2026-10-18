@@ -39,7 +39,6 @@ class Match_Library_Manager:
     def Display_Configuration( self ):
         print( "\n[bold]Match Library Manager[/bold]\n" )
         print( f"Dry Run: {self.Configuration.General['Dry_Run']}" )
-        print( f"Log Directory: {self.Configuration.General['Log_Directory']}\n" )
 
         print( "[bold]Configured Teams:[/bold]" )
 

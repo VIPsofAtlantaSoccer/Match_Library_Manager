@@ -52,9 +52,6 @@ class Config:
         if ( not isinstance( self.General.get( "Dry_Run" ), bool ) ):
             raise ValueError( "General.Dry_Run must be true or false" )
 
-        if ( not isinstance( self.General.get( "Log_Directory" ), str ) or not self.General["Log_Directory"].strip() ):
-            raise ValueError( "General.Log_Directory must be a non-empty string" )
-
         for Team_ID, Team_Data in self.Teams.items():
             if ( not isinstance( Team_Data, dict ) ):
                 raise ValueError( f"Invalid configuration for team: {Team_ID}" )
