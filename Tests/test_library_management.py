@@ -22,7 +22,7 @@ class Test_Library_Management( unittest.TestCase ):
         self.Temp_Directory = tempfile.TemporaryDirectory()
         self.Library_Directory = Path( self.Temp_Directory.name )
         self.Year_Directory = self.Library_Directory / "2017"
-        self.Manager = Library_Management( self.Library_Directory, Dry_Run = False )
+        self.Manager = Library_Management( self.Library_Directory, "TEST", Dry_Run = False )
         self.Expected_Name = "2017-03-06 - Orlando City at TEST, W 2-1"
 
 
@@ -102,7 +102,7 @@ class Test_Library_Management( unittest.TestCase ):
     def test_Dry_Run_Create( self ):
         """Previews directory creation without creating it"""
 
-        Manager = Library_Management( self.Library_Directory, Dry_Run = True )
+        Manager = Library_Management( self.Library_Directory, "TEST", Dry_Run = True )
         Result = Manager.Process_Match( self.Expected_Name )
 
         self.assertEqual( Result["Status"], "CREATE" )
@@ -118,7 +118,7 @@ class Test_Library_Management( unittest.TestCase ):
         Original_Directory = self.Year_Directory / "2017-03-06-TEST"
         Original_Directory.mkdir( parents = True )
 
-        Manager = Library_Management( self.Library_Directory, Dry_Run = True )
+        Manager = Library_Management( self.Library_Directory, "TEST", Dry_Run = True )
         Result = Manager.Process_Match( self.Expected_Name )
 
         self.assertEqual( Result["Status"], "RENAME" )

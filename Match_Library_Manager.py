@@ -70,7 +70,7 @@ class Match_Library_Manager:
             Library_Directory = Project_Directory / Library_Directory
 
         Dry_Run = self.Configuration.General["Dry_Run"]
-        Library = Library_Management( Library_Directory, Dry_Run )
+        Library = Library_Management( Library_Directory, Team_Data["Team_Name"], Dry_Run )
 
         Counts = { "CREATE": 0, "RENAME": 0, "UNCHANGED": 0, "CONFLICT": 0, "ERROR": 0 }
 

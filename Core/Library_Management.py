@@ -14,10 +14,11 @@ class Library_Management:
 
     #---------------------------------------------------------------------------------------------------------------#
     # Initialize the library manager
-    # Store the library location and dry-run setting
+    # Store the library path, configured team name, and dry-run setting
     #---------------------------------------------------------------------------------------------------------------#
-    def __init__( self, Library_Directory, Dry_Run = True ):
+    def __init__( self, Library_Directory, Team_Name, Dry_Run = True ):
         self.Library_Directory = Path( Library_Directory )
+        self.Team_Name = Team_Name
         self.Dry_Run = Dry_Run
 
 
@@ -40,10 +41,10 @@ class Library_Management:
         )
 
 
+
     #---------------------------------------------------------------------------------------------------------------#
-    # Compare the expected directory name against existing match directories
-    # Create, rename, or leave directories unchanged as appropriate
-    # Never modify ambiguous matches or overwrite an existing target
+    # Create or rename a match directory using the date and opponent
+    # Preserve existing files and report ambiguous matches without changing them
     #---------------------------------------------------------------------------------------------------------------#
     def Process_Match( self, Directory_Name ):
         Match_Date = Directory_Name[:10]
@@ -53,17 +54,27 @@ class Library_Management:
 
         Year_Directory = self.Library_Directory / Match_Date[:4]
         Target_Directory = Year_Directory / Directory_Name
-        Existing_Directories = self.Find_Match_Directories( Match_Date )
+        Opponent = self.Get_Directory_Opponent( Directory_Name )
 
-        if ( len( Existing_Directories ) > 1 ):
+        Source_Directory, Conflict = self.Find_Existing_Match( Match_Date, Opponent )
+
+        if ( Conflict ):
             return {
                 "Status": "CONFLICT",
                 "Source": None,
                 "Target": Target_Directory,
-                "Message": f"Multiple directories found for {Match_Date}",
+                "Message": Conflict,
             }
 
-        if ( not Existing_Directories ):
+        if ( Source_Directory is None ):
+            if ( Target_Directory.exists() ):
+                return {
+                    "Status": "CONFLICT",
+                    "Source": None,
+                    "Target": Target_Directory,
+                    "Message": "Target directory already exists",
+                }
+
             if ( not self.Dry_Run ):
                 Target_Directory.mkdir( parents = True, exist_ok = False )
 
@@ -73,8 +84,6 @@ class Library_Management:
                 "Target": Target_Directory,
                 "Message": "Directory created" if ( not self.Dry_Run ) else "Directory would be created",
             }
-
-        Source_Directory = Existing_Directories[0]
 
         if ( Source_Directory == Target_Directory ):
             return {
@@ -101,3 +110,68 @@ class Library_Management:
             "Target": Target_Directory,
             "Message": "Directory renamed" if ( not self.Dry_Run ) else "Directory would be renamed",
         }
+
+
+    #---------------------------------------------------------------------------------------------------------------#
+    # Extract the opponent from an existing match directory name
+    # Return None when the directory contains only the configured team
+    #---------------------------------------------------------------------------------------------------------------#
+    def Get_Directory_Opponent( self, Directory_Name ):
+        Match_Details = Directory_Name[10:].strip()
+
+        if ( Match_Details.startswith( "-" ) ):
+            Match_Details = Match_Details[1:].strip()
+
+        Match_Details = Match_Details.split( ",", 1 )[0].strip()
+
+        if ( Match_Details == self.Team_Name ):
+            return None
+
+        for Separator in [ " at ", " vs " ]:
+            if ( Separator in Match_Details ):
+                Team_1, Team_2 = Match_Details.split( Separator, 1 )
+
+                if ( Team_1 == self.Team_Name ):
+                    return Team_2
+
+                if ( Team_2 == self.Team_Name ):
+                    return Team_1
+
+        return None
+
+
+    #---------------------------------------------------------------------------------------------------------------#
+    # Identify the existing directory for a match using its date and opponent
+    # Match either team order and preserve support for incomplete directory names
+    #---------------------------------------------------------------------------------------------------------------#
+    def Find_Existing_Match( self, Match_Date, Opponent ):
+        Existing_Directories = self.Find_Match_Directories( Match_Date )
+
+        Identified_Matches = []
+        Unidentified_Matches = []
+
+        for Directory in Existing_Directories:
+            Existing_Opponent = self.Get_Directory_Opponent( Directory.name )
+
+            if ( Existing_Opponent is None ):
+                Unidentified_Matches.append( Directory )
+            elif ( Opponent and Existing_Opponent.casefold() == Opponent.casefold() ):
+                Identified_Matches.append( Directory )
+
+        if ( len( Identified_Matches ) == 1 ):
+            return Identified_Matches[0], None
+
+        if ( len( Identified_Matches ) > 1 ):
+            return None, f"Multiple directories match {Match_Date} against {Opponent}"
+
+        if ( len( Unidentified_Matches ) == 1 ):
+            return Unidentified_Matches[0], None
+
+        if ( len( Unidentified_Matches ) > 1 ):
+            return None, f"Multiple unidentified directories exist for {Match_Date}"
+
+        if ( not Opponent and Existing_Directories ):
+            return None, f"Cannot identify the opponent for {Match_Date}"
+
+        return None, None
+
