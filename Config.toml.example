@@ -1,9 +1,19 @@
+
 #---------------------------------------------------------------------------------------------------------------#
 # General Configuration
 #---------------------------------------------------------------------------------------------------------------#
 [General]
 Dry_Run = true
-Log_Directory = "Logs"
+
+
+#---------------------------------------------------------------------------------------------------------------#
+# TESTING
+#---------------------------------------------------------------------------------------------------------------#
+[Teams.TEST]
+Team_Name = "TEST"
+Enabled = false
+Library_Directory = "Tests"
+Source_File = "Tests/Tests_Matchlogs.csv"
 
 
 #---------------------------------------------------------------------------------------------------------------#
@@ -11,9 +21,9 @@ Log_Directory = "Logs"
 #---------------------------------------------------------------------------------------------------------------#
 [Teams.ATLUTD]
 Team_Name = "Atlanta United"
-Enabled = true
-Library_Directory = "path"
-Source_File = "path/Atlanta_United_Matchlogs.csv"
+Enabled = false
+Library_Directory = 'path'
+Source_File = 'path/ATLUTD_Matches.csv'
 
 
 #---------------------------------------------------------------------------------------------------------------#
@@ -22,8 +32,9 @@ Source_File = "path/Atlanta_United_Matchlogs.csv"
 [Teams.ATLUTD2]
 Team_Name = "Atlanta United 2"
 Enabled = false
-Library_Directory = "path"
-Source_File = "path/Atlanta_United2_Matchlog.csv"
+Library_Directory = 'path'
+Source_File = 'path/ATLUTD2_Matches.csv'
+
 
 #---------------------------------------------------------------------------------------------------------------#
 # Atlanta City FC
@@ -31,5 +42,5 @@ Source_File = "path/Atlanta_United2_Matchlog.csv"
 [Teams.ATL_City]
 Team_Name = "Atlanta City FC"
 Enabled = false
-Library_Directory = "path"
-Source_File = "path/Atlanta_City_Matchlog.csv"
+Library_Directory = 'path'
+Source_File = 'path/Atlanta_City_Matchlog.csv'
