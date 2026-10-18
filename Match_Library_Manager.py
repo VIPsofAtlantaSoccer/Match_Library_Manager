@@ -9,6 +9,7 @@ from rich.traceback import install
 
 from Core.Config import Config
 from Core.Match_Processing import Match_Processing
+from Core.Directory_Naming import Directory_Naming
 
 
 #---------------------------------------------------------------------------------------------------------------#
@@ -52,14 +53,26 @@ class Match_Library_Manager:
 
 
     #---------------------------------------------------------------------------------------------------------------#
-    # Display the match processing summary and any warnings for an individual team
+    # Generate directory names and display a summary for an individual team
+    # Report warnings without printing every successful match
     #---------------------------------------------------------------------------------------------------------------#
     def Display_Matches( self, Team_ID, Matches, Warnings ):
-        print( f"\n[bold]{Team_ID}[/bold] - {len( Matches )} matches loaded" )
+        Team_Data = self.Configuration.Get_Team( Team_ID )
+        Naming = Directory_Naming( Team_Data["Team_Name"] )
+
+        Generated_Count = 0
+
+        for Match in Matches:
+            try:
+                Directory_Name = Naming.Generate_Name( Match )
+                Generated_Count += 1
+            except ValueError as Error:
+                Warnings.append( f"{Match.get( 'Date', '' )}: {Error}" )
+
+        print( f"\n[bold]{Team_ID}[/bold] - {len( Matches )} matches loaded, {Generated_Count} directory names generated" )
 
         for Warning in Warnings:
             print( f"  [yellow]Warning: {Warning}[/yellow]" )
-
 
     #---------------------------------------------------------------------------------------------------------------#
     # Read and process CSV match records for all enabled teams
