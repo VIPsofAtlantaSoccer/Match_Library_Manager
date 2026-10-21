@@ -5,6 +5,7 @@
 import re
 from pathlib import Path
 
+from Core.Team_Names import Team_Names
 
 #---------------------------------------------------------------------------------------------------------------#
 # Library Management
@@ -14,11 +15,12 @@ class Library_Management:
 
     #---------------------------------------------------------------------------------------------------------------#
     # Initialize the library manager
-    # Store the library path, configured team name, and dry-run setting
+    # Store the library path, configured team, dictionary lookup, and dry-run setting
     #---------------------------------------------------------------------------------------------------------------#
-    def __init__( self, Library_Directory, Team_Name, Dry_Run = True ):
+    def __init__( self, Library_Directory, Team_Name, Team_Names, Dry_Run = True ):
         self.Library_Directory = Path( Library_Directory )
         self.Team_Name = Team_Name
+        self.Team_Names = Team_Names
         self.Dry_Run = Dry_Run
 
 
@@ -112,9 +114,11 @@ class Library_Management:
         }
 
 
+
     #---------------------------------------------------------------------------------------------------------------#
     # Extract the opponent from an existing match directory name
-    # Return None when the directory contains only the configured team
+    # Identify the configured team using standardized dictionary names
+    # Return None when the directory does not identify an opponent
     #---------------------------------------------------------------------------------------------------------------#
     def Get_Directory_Opponent( self, Directory_Name ):
         Match_Details = Directory_Name[10:].strip()
@@ -124,20 +128,21 @@ class Library_Management:
 
         Match_Details = Match_Details.split( ",", 1 )[0].strip()
 
-        if ( Match_Details == self.Team_Name ):
+        if ( self.Team_Names.Is_Same_Team( Match_Details, self.Team_Name ) ):
             return None
 
         for Separator in [ " at ", " vs " ]:
             if ( Separator in Match_Details ):
                 Team_1, Team_2 = Match_Details.split( Separator, 1 )
 
-                if ( Team_1 == self.Team_Name ):
-                    return Team_2
+                if ( self.Team_Names.Is_Same_Team( Team_1, self.Team_Name ) ):
+                    return self.Team_Names.Standardize( Team_2 )
 
-                if ( Team_2 == self.Team_Name ):
-                    return Team_1
+                if ( self.Team_Names.Is_Same_Team( Team_2, self.Team_Name ) ):
+                    return self.Team_Names.Standardize( Team_1 )
 
         return None
+
 
 
     #---------------------------------------------------------------------------------------------------------------#
@@ -155,7 +160,7 @@ class Library_Management:
 
             if ( Existing_Opponent is None ):
                 Unidentified_Matches.append( Directory )
-            elif ( Opponent and Existing_Opponent.casefold() == Opponent.casefold() ):
+            elif ( Opponent and self.Team_Names.Is_Same_Team( Existing_Opponent, Opponent ) ):
                 Identified_Matches.append( Directory )
 
         if ( len( Identified_Matches ) == 1 ):

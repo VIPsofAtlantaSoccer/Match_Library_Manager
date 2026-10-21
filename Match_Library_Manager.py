@@ -13,6 +13,7 @@ from Core.Config import Config
 from Core.Match_Processing import Match_Processing
 from Core.Directory_Naming import Directory_Naming
 from Core.Library_Management import Library_Management
+from Core.Team_Names import Team_Names
 
 #---------------------------------------------------------------------------------------------------------------#
 # Enable Rich tracebacks for unexpected errors
@@ -32,7 +33,13 @@ class Match_Library_Manager:
     def __init__( self ):
         self.Configuration = Config()
 
+        Dictionary_File = Path( self.Configuration.General["Team_Dictionary"] )
 
+        if ( not Dictionary_File.is_absolute() ):
+            Dictionary_File = Path( __file__ ).resolve().parent / Dictionary_File
+
+        self.Team_Names = Team_Names( Dictionary_File )
+        
     #---------------------------------------------------------------------------------------------------------------#
     # Display general configuration and configured teams
     #---------------------------------------------------------------------------------------------------------------#
@@ -70,7 +77,7 @@ class Match_Library_Manager:
             Library_Directory = Project_Directory / Library_Directory
 
         Dry_Run = self.Configuration.General["Dry_Run"]
-        Library = Library_Management( Library_Directory, Team_Data["Team_Name"], Dry_Run )
+        Library = Library_Management( Library_Directory, Team_Data["Team_Name"], self.Team_Names, Dry_Run )
 
         Counts = { "CREATE": 0, "RENAME": 0, "UNCHANGED": 0, "CONFLICT": 0, "ERROR": 0 }
 

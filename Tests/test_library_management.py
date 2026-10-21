@@ -5,9 +5,11 @@
 import tempfile
 import unittest
 from pathlib import Path
+import json
+
 
 from Core.Library_Management import Library_Management
-
+from Core.Team_Names import Team_Names
 
 #---------------------------------------------------------------------------------------------------------------#
 # Library Management Tests
@@ -16,15 +18,35 @@ from Core.Library_Management import Library_Management
 class Test_Library_Management( unittest.TestCase ):
 
     #---------------------------------------------------------------------------------------------------------------#
-    # Create an isolated temporary library for each test
+    # Create an isolated test library and sample team-name dictionary
+    # Initialize the library manager using the shared dictionary lookup
     #---------------------------------------------------------------------------------------------------------------#
     def setUp( self ):
         self.Temp_Directory = tempfile.TemporaryDirectory()
         self.Library_Directory = Path( self.Temp_Directory.name )
         self.Year_Directory = self.Library_Directory / "2017"
-        self.Manager = Library_Management( self.Library_Directory, "TEST", Dry_Run = False )
         self.Expected_Name = "2017-03-06 - Orlando City at TEST, W 2-1"
 
+        Dictionary_Data = {
+            "Teams": [
+                {
+                    "Type": "Team",
+                    "Name_Social": "Orlando City",
+                    "Name Variations": [ "Orlando SC", "Orlando City SC" ]
+                },
+                {
+                    "Type": "Team",
+                    "Name_Social": "TEST",
+                    "Name Variations": []
+                }
+            ]
+        }
+
+        Dictionary_File = self.Library_Directory / "Player_Dictionary.json"
+        Dictionary_File.write_text( json.dumps( Dictionary_Data ), encoding = "utf-8" )
+
+        self.Team_Names = Team_Names( Dictionary_File )
+        self.Manager = Library_Management( self.Library_Directory, "TEST", self.Team_Names, Dry_Run = False )
 
     #---------------------------------------------------------------------------------------------------------------#
     # Remove the temporary library after each test
@@ -102,7 +124,7 @@ class Test_Library_Management( unittest.TestCase ):
     def test_Dry_Run_Create( self ):
         """Previews directory creation without creating it"""
 
-        Manager = Library_Management( self.Library_Directory, "TEST", Dry_Run = True )
+        Manager = Library_Management( self.Library_Directory, "TEST", self.Team_Names, Dry_Run = True )
         Result = Manager.Process_Match( self.Expected_Name )
 
         self.assertEqual( Result["Status"], "CREATE" )
@@ -118,7 +140,7 @@ class Test_Library_Management( unittest.TestCase ):
         Original_Directory = self.Year_Directory / "2017-03-06-TEST"
         Original_Directory.mkdir( parents = True )
 
-        Manager = Library_Management( self.Library_Directory, "TEST", Dry_Run = True )
+        Manager = Library_Management( self.Library_Directory, "TEST", self.Team_Names, Dry_Run = True )
         Result = Manager.Process_Match( self.Expected_Name )
 
         self.assertEqual( Result["Status"], "RENAME" )
@@ -144,7 +166,22 @@ class Test_Library_Management( unittest.TestCase ):
         self.assertTrue( First_Directory.is_dir() )
         self.assertTrue( Second_Directory.is_dir() )
 
+    #---------------------------------------------------------------------------------------------------------------#
+    # Verify that alternate opponent names identify the same match
+    # Rename an existing directory using the standardized CSV opponent name
+    #---------------------------------------------------------------------------------------------------------------#
+    def test_Team_Name_Alias( self ):
+        """Renames a directory when the opponent uses an alternate name"""
 
+        Original_Directory = self.Year_Directory / "2017-03-06 - Orlando SC at TEST, W 2-1"
+        Original_Directory.mkdir( parents = True )
+
+        Result = self.Manager.Process_Match( self.Expected_Name )
+
+        self.assertEqual( Result["Status"], "RENAME" )
+        self.assertFalse( Original_Directory.exists() )
+        self.assertTrue( ( self.Year_Directory / self.Expected_Name ).is_dir() )
+        
 #---------------------------------------------------------------------------------------------------------------#
 # Test Entry Point
 #---------------------------------------------------------------------------------------------------------------#
